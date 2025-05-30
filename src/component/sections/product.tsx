@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Image from "next/image";
 import { ArrowRight, Plus} from "lucide-react";
@@ -18,12 +19,12 @@ export default function Product() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
+  const router = useRouter();
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get('https://glore-bd-backend-node-mongo.vercel.app/api/product');
-    
         setProducts(response.data.data);
       } catch (err) {
         console.error('❌ Error fetching products:', err);
@@ -36,6 +37,10 @@ export default function Product() {
     fetchProducts();
   }, []);
 
+  const handleProductClick = (productId: string) => {
+    router.push(`/product_desp/${productId}`);
+  };
+
   if (loading) return <p className="text-center py-20">Loading...</p>;
   if (error) return <p className="text-center py-20 text-red-500">{error}</p>;
 
@@ -46,7 +51,8 @@ export default function Product() {
           {products.map((product) => (
             <div
               key={product._id}
-              className="relative flex flex-col justify-between overflow-hidden group"
+              className="relative flex flex-col justify-between overflow-hidden group cursor-pointer transform hover:scale-105 transition-transform duration-300"
+              onClick={() => handleProductClick(product._id)}
             >
               <div className="bg-amber-200 relative rounded-[15px] before:content-[''] before:absolute before:h-[20px] before:w-[20px] before:top-[16%] before:right-0 before:rounded-full before:[box-shadow:10px_-10px_0_#fef3c7] overflow-hidden"
               >
@@ -56,7 +62,7 @@ export default function Product() {
                     alt={product.name}
                     height={200}
                     width={500}
-                    className="object-fit w-full h-full"
+                    className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110"
                   />
                 </div>
 
@@ -71,7 +77,7 @@ export default function Product() {
                           {product.name}
                         </h1>
                       </div>
-                      <p className="text-black overflow-hidden text-sm mb-3">
+                      <p className="text-black overflow-hidden text-sm mb-3 line-clamp-2">
                         {product.description}
                       </p>
                       <p className="text-black text-sm font-medium">
@@ -80,6 +86,9 @@ export default function Product() {
                       <p className="text-black text-sm font-medium">
                         Price: ${product.price}
                       </p>
+                      <div className="mt-3 text-xs text-black/70 hover:text-black transition-colors">
+                        Click to view details →
+                      </div>
                     </div>
                   </div>
                 </div>
